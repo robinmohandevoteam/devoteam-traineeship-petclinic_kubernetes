@@ -1,0 +1,126 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+resources:
+  pipelines:
+  - pipeline: master-pipeline
+    source: build-master-pipeline
+    trigger: true
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- task: InstallSSHKey@0
+  displayName: 'Install an SSH key'
+  inputs:
+    knownHostsEntry: default
+    sshPublicKey: '$(SSH_PUB_KEY)'
+    sshKeySecureFile: robinmohandevoteamdevops
+
+
+- task: Bash@3
+  inputs:
+    displayName: 'Set Ansible host key checking to false (might not be necessary)'
+    targetType: 'inline'
+    script: 'export ANSIBLE_HOST_KEY_CHECKING=False'
+
+
+- task: UsePythonVersion@0
+  displayName: 'Install Python'
+  inputs:
+    addToPath: true 
+    versionSpec: '3.9'
+
+- task: TerraformTaskV2@2
+  displayName: 'Terraform Init'
+  inputs:
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+    commandOptions: '-reconfigure'
+    backendServiceArm: 'robinmohan-TFSPN'
+    backendAzureRmResourceGroupName: 'pers-robin_mohan-rg'
+    backendAzureRmStorageAccountName: 'storageforrobin'
+    backendAzureRmContainerName: 'tstate'
+    backendAzureRmKey: 'fWu4MDKgnyEOOE+xYzrd+zTHzKq0dsMNdDfKSJ6VMvYlOQhVWc4NamjpXUicPO6AM84AGtjWhBoqYpKUlnb/tA=='
+- task: TerraformTaskV2@2
+  displayName: 'Terraform Plan'
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
+
+- task: TerraformTaskV2@2
+  displayName: 'Terraform Verify and Apply'
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
+
+
+- script: pip install ansible[azure]
+  displayName: 'Install Ansible and the Azure modules'
+
+- script: |
+   python -m pip install --upgrade pip
+   ansible-galaxy collection install azure.azcollection
+   pip install azure-common
+   pip install azure-common.credentials
+   wget -q https://raw.githubusercontent.com/ansible-collections/azure/dev/requirements-azure.txt; \
+    pip3 install -r requirements-azure.txt; \
+  displayName: 'Install Ansible and Python plugins (Do not delete)'
+
+- script: ansible-playbook -i ./ansible/ansible_azure_rm.yml ./ansible/installdocker.yml -e ANSIBLE_HOST_KEY_CHECKING=False --ssh-extra-args='-o StrictHostKeyChecking=no'
+
+  displayName: 'Run Ansible Playbook'
+  env:
+    AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
+    AZURE_SECRET: $(ARM_CLIENT_SECRET)
+    AZURE_TENANT: $(ARM_TENANT_ID)
+    AZURE_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)  
+
+- script: PUBLIC_IP_ADDRESS=$(terraform output -json public_ip_address | jq -r '.[0]')
+  displayName: Make env variable for IP Address
+
+- script: echo $PUBLIC_IP_ADDRESS
+  displayName: echo variable
+
+- task: AlexandreGattiker.jmeter-tasks.custom-jmeter-installer-task.JMeterInstaller@0
+  displayName: 'Install JMeter 5.4.3'
+  inputs:
+    jmeterVersion: 5.4.3
+
+# - script: |
+#     wget -c https://apache.newfountain.nl//jmeter/binaries/apache-jmeter-5.4.3.tgz
+#     tar -xf apache-jmeter-5.4.3.tgz
+#     wget -P apache-jmeter-5.4.3/lib/ext https://jmeter-plugins.org/get/
+#   displayName: 'Install the dependency packages'
+
+
+
+
+- script: wget https://raw.githubusercontent.com/robinmohandevoteam/devoteam-traineeship-petclinic/master/src/test/jmeter/petclinic_test_plan.jmx
+
+# - script: jmeter -n -t petclinic_blazemeter_demo2.jmx -l log.jtl -Jhost=$PUBLIC_IP_ADDRESS
+#   displayName: Run Jmeter test
+
+- script: |
+        jmeter -n -t petclinic_test_plan.jmx -l log.jtl -Jhost=$PUBLIC_IP_ADDRESS
+  displayName: 'Run JMeter'
+
+- task: TerraformTaskV2@2
+  displayName: 'Terraform Destroy'
+  inputs:
+    provider: 'azurerm'
+    command: 'destroy'
+    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
