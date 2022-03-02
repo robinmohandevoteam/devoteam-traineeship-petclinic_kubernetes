@@ -45,18 +45,18 @@ steps:
     command: 'init'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
     commandOptions: '-reconfigure'
-    backendServiceArm: 'robinmohan-TFSPN'
+    backendServiceArm: 'robin-playground'
     backendAzureRmResourceGroupName: 'pers-robin_mohan-rg'
-    backendAzureRmStorageAccountName: 'storageforrobin'
+    backendAzureRmStorageAccountName: 'terraformbackend020322'
     backendAzureRmContainerName: 'tstate'
-    backendAzureRmKey: 'fWu4MDKgnyEOOE+xYzrd+zTHzKq0dsMNdDfKSJ6VMvYlOQhVWc4NamjpXUicPO6AM84AGtjWhBoqYpKUlnb/tA=='
+    backendAzureRmKey: 'm9I4sNng6wey5dFAjVTcwcRgxdY0I5h2oq9dpe+Z+e7kW3Q8iih8h7pHuUdkYRzsAdxMMBUkf2W/vl67kD7LMw=='
 - task: TerraformTaskV2@2
   displayName: 'Terraform Plan'
   inputs:
     provider: 'azurerm'
     command: 'plan'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
+    environmentServiceNameAzureRM: 'robin-playground'
 
 - task: TerraformTaskV2@2
   displayName: 'Terraform Verify and Apply'
@@ -64,7 +64,7 @@ steps:
     provider: 'azurerm'
     command: 'apply'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
+    environmentServiceNameAzureRM: 'robin-playground'
 
 
 - script: pip install ansible[azure]
