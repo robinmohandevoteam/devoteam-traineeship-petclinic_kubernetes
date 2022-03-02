@@ -33,7 +33,7 @@ steps:
     command: 'init'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
     commandOptions: '-reconfigure'
-    backendServiceArm: 'robin-playground'
+    backendServiceArm: 'robinmohan-petclinic-TFSPN'
     backendAzureRmResourceGroupName: 'pers-robin_mohan-rg'
     backendAzureRmStorageAccountName: 'terraformbackend020322'
     backendAzureRmContainerName: 'tstate'
