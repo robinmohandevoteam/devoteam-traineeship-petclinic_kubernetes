@@ -174,14 +174,6 @@ resource "kubernetes_service" "petclinictest" {
   }
 }
 
-output "load_balancer_name" {
-  value = local.lb_name
-}
-
 output "load_balancer_hostname" {
-  value = kubernetes_service.example.status.0.load_balancer.0.ingress.0.hostname
-}
-
-output "load_balancer_info" {
-  value = data.aws_elb.example
+  value = kubernetes_service.petclinictest.status.0.load_balancer.0.ingress.0.hostname
 }
