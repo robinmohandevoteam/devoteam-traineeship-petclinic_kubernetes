@@ -17,19 +17,7 @@ pool:
 
 steps:
 
-- task: InstallSSHKey@0
-  displayName: 'Install an SSH key'
-  inputs:
-    knownHostsEntry: default
-    sshPublicKey: '$(SSH_PUB_KEY)'
-    sshKeySecureFile: robinmohandevoteamdevops
 
-
-- task: Bash@3
-  inputs:
-    displayName: 'Set Ansible host key checking to false (might not be necessary)'
-    targetType: 'inline'
-    script: 'export ANSIBLE_HOST_KEY_CHECKING=False'
 
 
 - task: UsePythonVersion@0
@@ -56,7 +44,7 @@ steps:
     provider: 'azurerm'
     command: 'plan'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    environmentServiceNameAzureRM: 'robin-playground'
+    environmentServiceNameAzureRM: 'robinmohan-petclinic-TFSPN'
 
 - task: TerraformTaskV2@2
   displayName: 'Terraform Verify and Apply'
@@ -64,7 +52,7 @@ steps:
     provider: 'azurerm'
     command: 'apply'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    environmentServiceNameAzureRM: 'robin-playground'
+    environmentServiceNameAzureRM: 'robinmohan-petclinic-TFSPN'
 
 
 - script: pip install ansible[azure]
@@ -123,4 +111,4 @@ steps:
     provider: 'azurerm'
     command: 'destroy'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    environmentServiceNameAzureRM: 'robinmohan-TFSPN'
+    environmentServiceNameAzureRM: 'robinmohan-petclinic-TFSPN'
