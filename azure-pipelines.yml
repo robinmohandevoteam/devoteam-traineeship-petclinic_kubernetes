@@ -55,28 +55,9 @@ steps:
     environmentServiceNameAzureRM: 'robinmohan-petclinic-TFSPN'
 
 
-- script: pip install ansible[azure]
-  displayName: 'Install Ansible and the Azure modules'
 
-- script: |
-   python -m pip install --upgrade pip
-   ansible-galaxy collection install azure.azcollection
-   pip install azure-common
-   pip install azure-common.credentials
-   wget -q https://raw.githubusercontent.com/ansible-collections/azure/dev/requirements-azure.txt; \
-    pip3 install -r requirements-azure.txt; \
-  displayName: 'Install Ansible and Python plugins (Do not delete)'
 
-- script: ansible-playbook -i ./ansible/ansible_azure_rm.yml ./ansible/installdocker.yml -e ANSIBLE_HOST_KEY_CHECKING=False --ssh-extra-args='-o StrictHostKeyChecking=no'
-
-  displayName: 'Run Ansible Playbook'
-  env:
-    AZURE_CLIENT_ID: $(ARM_CLIENT_ID)
-    AZURE_SECRET: $(ARM_CLIENT_SECRET)
-    AZURE_TENANT: $(ARM_TENANT_ID)
-    AZURE_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)  
-
-- script: PUBLIC_IP_ADDRESS=$(terraform output -json public_ip_address | jq -r '.[0]')
+- script: PUBLIC_IP_ADDRESS=$(terraform output -json load_balancer_hostname | jq -r '.[0]')
   displayName: Make env variable for IP Address
 
 - script: echo $PUBLIC_IP_ADDRESS
