@@ -77,14 +77,14 @@ steps:
 
 
 
-- script: wget https://raw.githubusercontent.com/robinmohandevoteam/devoteam-traineeship-petclinic/master/src/test/jmeter/petclinic_test_plan.jmx
+# - script: wget https://raw.githubusercontent.com/robinmohandevoteam/devoteam-traineeship-petclinic/master/src/test/jmeter/petclinic_test_plan.jmx
 
 # - script: jmeter -n -t petclinic_blazemeter_demo2.jmx -l log.jtl -Jhost=$PUBLIC_IP_ADDRESS
 #   displayName: Run Jmeter test
 
-- script: |
-        jmeter -n -t petclinic_test_plan.jmx -l log.jtl -Jhost=$PUBLIC_IP_ADDRESS
-  displayName: 'Run JMeter'
+# - script: |
+#         jmeter -n -t petclinic_test_plan.jmx -l log.jtl -Jhost=$PUBLIC_IP_ADDRESS
+#   displayName: 'Run JMeter'
 
 - task: TerraformTaskV2@2
   displayName: 'Terraform Destroy'
