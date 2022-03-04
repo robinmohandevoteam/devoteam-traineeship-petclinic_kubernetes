@@ -60,6 +60,10 @@ steps:
 - script: PUBLIC_IP_ADDRESS=$(terraform output -json load_balancer_hostname | jq -r '.[0]')
   displayName: Make env variable for IP Address
 
+- script: PUBLIC_IP_ADDRESS=$(terraform output load_balancer_hostname)
+  displayName: Make env variable for IP Address
+
+
 - script: echo $PUBLIC_IP_ADDRESS
   displayName: echo variable
 
