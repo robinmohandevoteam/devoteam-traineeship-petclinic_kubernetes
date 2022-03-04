@@ -107,9 +107,8 @@ resource "azurerm_role_assignment" "kubweb_to_acr" {
 }
 
 resource "kubernetes_deployment" "petclinictest" {
-  lifecycle {
-    prevent_destroy = true
-  }
+
+  depends_on = [kubernetes_namespace.petclinictest]
   metadata {
     name = "petclinictest"
     namespace = "petclinictest-ns"
